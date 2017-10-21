@@ -1,0 +1,12 @@
+{
+  "linkToItself": true,
+  "searchRoots": [
+    "$HOME/WebstormProjects/oresoftware"
+  ],
+  "ignore": [
+    "/node_modules/",
+    "/.git/"
+  ],
+  "list": [
+  ]
+}
