@@ -1,6 +1,6 @@
 /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "(createSpecFilter|createStartFn)" }]*/
 
-'use strict'
+'use strict';
 
 /**
  * Decision maker for whether a stack entry is considered external to jasmine and karma.
@@ -10,7 +10,7 @@
 function isExternalStackEntry (entry) {
   return !!entry &&
   // entries related to jasmine and karma-jasmine:
-  !/\/(jasmine-core|karma-jasmine)\//.test(entry) &&
+  !/\/(suman|karma-suman)\//.test(entry) &&
   // karma specifics, e.g. "at http://localhost:7018/karma.js:185"
   !/\/(karma.js|context.html):/.test(entry)
 }
@@ -21,10 +21,10 @@ function isExternalStackEntry (entry) {
  * @return {Array}        A list of relevant stack entries.
  */
 function getRelevantStackFrom (stack) {
-  var filteredStack = []
-  var relevantStack = []
+  var filteredStack = [];
+  var relevantStack = [];
 
-  stack = stack.split('\n')
+  stack = stack.split('\n');
 
   for (var i = 0; i < stack.length; i += 1) {
     if (isExternalStackEntry(stack[i])) {
@@ -64,14 +64,14 @@ function formatFailedStep (step) {
   // so we just return the error message:
   if (!step.stack) { return step.message }
 
-  var relevantMessage = []
-  var relevantStack = []
+  var relevantMessage = [];
+  var relevantStack = [];
 
   // Remove the message prior to processing the stack to prevent issues like
   // https://github.com/karma-runner/karma-jasmine/issues/79
-  var stack = step.stack.replace('Error: ' + step.message, '')
+  var stack = step.stack.replace('Error: ' + step.message, '');
 
-  var dirtyRelevantStack = getRelevantStackFrom(stack)
+  var dirtyRelevantStack = getRelevantStackFrom(stack);
 
   // PhantomJS returns multiline error message for errors coming from specs
   // (for example when calling a non-existing function). This error is present
@@ -92,7 +92,7 @@ function formatFailedStep (step) {
   // In most cases the above will leave us with an empty message...
   if (relevantMessage.length === 0) {
     // Let's reuse the original message:
-    relevantMessage.push(step.message)
+    relevantMessage.push(step.message);
 
     // Now we probably have a repetition case where:
     // relevantMessage: ["Expected true to be false."]
@@ -114,26 +114,26 @@ function formatFailedStep (step) {
 }
 
 function SuiteNode (name, parent) {
-  this.name = name
-  this.parent = parent
-  this.children = []
+  this.name = name;
+  this.parent = parent;
+  this.children = [];
 
   this.addChild = function (name) {
-    var suite = new SuiteNode(name, this)
-    this.children.push(suite)
-    return suite
+    var suite = new SuiteNode(name, this);
+    this.children.push(suite);
+    return suite;
   }
 }
 
 function processSuite (suite, pointer) {
-  var child
-  var childPointer
+  var child;
+  var childPointer;
 
   for (var i = 0; i < suite.children.length; i++) {
-    child = suite.children[i]
+    child = suite.children[i];
 
     if (child.children) {
-      childPointer = pointer[child.description] = {_: []}
+      childPointer = pointer[child.description] = {_: []};
       processSuite(child, childPointer)
     } else {
       if (!pointer._) {
@@ -145,22 +145,22 @@ function processSuite (suite, pointer) {
 }
 
 function getAllSpecNames (topSuite) {
-  var specNames = {}
+  var specNames = {};
 
-  processSuite(topSuite, specNames)
+  processSuite(topSuite, specNames);
 
-  return specNames
+  return specNames;
 }
 
 /**
  * Very simple reporter for Jasmine.
  */
 function KarmaReporter (tc, jasmineEnv) {
-  var currentSuite = new SuiteNode()
+  var currentSuite = new SuiteNode();
 
   // Save link on native Date object
   // because user can mock it
-  var _Date = Date
+  var _Date = Date;
 
   /**
    * @param suite
@@ -172,10 +172,10 @@ function KarmaReporter (tc, jasmineEnv) {
 
   function handleGlobalErrors (result) {
     if (result.failedExpectations && result.failedExpectations.length) {
-      var message = 'An error was thrown in afterAll'
-      var steps = result.failedExpectations
+      var message = 'An error was thrown in afterAll';
+      var steps = result.failedExpectations;
       for (var i = 0, l = steps.length; i < l; i++) {
-        message += '\n' + formatFailedStep(steps[i])
+        message += '\n' + formatFailedStep(steps[i]);
       }
 
       tc.error(message)
@@ -199,25 +199,25 @@ function KarmaReporter (tc, jasmineEnv) {
       total: data.totalSpecsDefined,
       specs: getAllSpecNames(jasmineEnv.topSuite())
     })
-  }
+  };
 
   this.jasmineDone = function (result) {
-    result = result || {}
+    result = result || {};
 
     // Any errors in top-level afterAll blocks are given here.
-    handleGlobalErrors(result)
+    handleGlobalErrors(result);
 
     tc.complete({
       order: result.order,
       coverage: window.__coverage__
     })
-  }
+  };
 
   this.suiteStarted = function (result) {
     if (!isTopLevelSuite(result)) {
       currentSuite = currentSuite.addChild(result.description)
     }
-  }
+  };
 
   this.suiteDone = function (result) {
     // In the case of xdescribe, only "suiteDone" is fired.
@@ -228,17 +228,17 @@ function KarmaReporter (tc, jasmineEnv) {
 
     // Any errors in afterAll blocks are given here, except for top-level
     // afterAll blocks.
-    handleGlobalErrors(result)
+    handleGlobalErrors(result);
 
     currentSuite = currentSuite.parent
-  }
+  };
 
   this.specStarted = function (specResult) {
     specResult.startTime = new _Date().getTime()
-  }
+  };
 
   this.specDone = function (specResult) {
-    var skipped = specResult.status === 'disabled' || specResult.status === 'pending'
+    var skipped = specResult.status === 'disabled' || specResult.status === 'pending';
 
     var result = {
       description: specResult.description,
@@ -251,23 +251,23 @@ function KarmaReporter (tc, jasmineEnv) {
       suite: [],
       time: skipped ? 0 : new _Date().getTime() - specResult.startTime,
       executedExpectationsCount: specResult.failedExpectations.length + specResult.passedExpectations.length
-    }
+    };
 
     // generate ordered list of (nested) suite names
-    var suitePointer = currentSuite
+    var suitePointer = currentSuite;
     while (suitePointer.parent) {
-      result.suite.unshift(suitePointer.name)
-      suitePointer = suitePointer.parent
+      result.suite.unshift(suitePointer.name);
+      suitePointer = suitePointer.parent;
     }
 
     if (!result.success) {
-      var steps = specResult.failedExpectations
+      var steps = specResult.failedExpectations;
       for (var i = 0, l = steps.length; i < l; i++) {
         result.log.push(formatFailedStep(steps[i]))
       }
     }
 
-    tc.result(result)
+    tc.result(result);
     delete specResult.startTime
   }
 }
@@ -278,10 +278,10 @@ function KarmaReporter (tc, jasmineEnv) {
  * @return {string} The value of grep option by default empty string
  */
 var getGrepOption = function (clientArguments) {
-  var grepRegex = /^--grep=(.*)$/
+  var grepRegex = /^--grep=(.*)$/;
 
   if (Object.prototype.toString.call(clientArguments) === '[object Array]') {
-    var indexOfGrep = indexOf(clientArguments, '--grep')
+    var indexOfGrep = indexOf(clientArguments, '--grep');
 
     if (indexOfGrep !== -1) {
       return clientArguments[indexOfGrep + 1]
@@ -293,40 +293,40 @@ var getGrepOption = function (clientArguments) {
       return arg.replace(grepRegex, '$1')
     })[0] || ''
   } else if (typeof clientArguments === 'string') {
-    var match = /--grep=([^=]+)/.exec(clientArguments)
+    var match = /--grep=([^=]+)/.exec(clientArguments);
 
     return match ? match[1] : ''
   }
-}
+};
 
 /**
  * Create jasmine spec filter
  * @param {Object} options Spec filter options
  */
 var KarmaSpecFilter = function (options) {
-  var filterString = options && options.filterString() && options.filterString().replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
-  var filterPattern = new RegExp(filterString)
+  var filterString = options && options.filterString() && options.filterString().replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  var filterPattern = new RegExp(filterString);
 
   this.matches = function (specName) {
     return filterPattern.test(specName)
   }
-}
+};
 
 /**
  * @param {Object} config The karma config
  * @param {Object} jasmineEnv jasmine environment object
  */
 var createSpecFilter = function (config, jasmineEnv) {
-  var specFilter = new KarmaSpecFilter({
-    filterString: function () {
-      return getGrepOption(config.args)
-    }
-  })
-
-  jasmineEnv.specFilter = function (spec) {
-    return specFilter.matches(spec.getFullName())
-  }
-}
+  // var specFilter = new KarmaSpecFilter({
+  //   filterString: function () {
+  //     return getGrepOption(config.args)
+  //   }
+  // });
+  //
+  // jasmineEnv.specFilter = function (spec) {
+  //   return specFilter.matches(spec.getFullName())
+  // }
+};
 
 /**
  * Karma starter function factory.
@@ -339,26 +339,32 @@ var createSpecFilter = function (config, jasmineEnv) {
  * @return {Function}              Karma starter function.
  */
 function createStartFn (karma, jasmineEnv) {
-  // This function will be assigned to `window.__karma__.start`:
-  return function () {
-    var clientConfig = karma.config || {}
-    var jasmineConfig = clientConfig.jasmine || {}
 
-    jasmineEnv = jasmineEnv || window.jasmine.getEnv()
-
-    setOption(jasmineConfig.stopOnFailure, jasmineEnv.throwOnExpectationFailure)
-    setOption(jasmineConfig.seed, jasmineEnv.seed)
-    setOption(jasmineConfig.random, jasmineEnv.randomizeTests)
-
-    jasmineEnv.addReporter(new KarmaReporter(karma, jasmineEnv))
-    jasmineEnv.execute()
-  }
 
   function setOption (option, set) {
     if (option != null) {
       set(option)
     }
   }
+
+  // This function will be assigned to `window.__karma__.start`:
+  return function () {
+
+    console.log('suman started.');
+    // var clientConfig = karma.config || {}
+    // var jasmineConfig = clientConfig.jasmine || {}
+    //
+    // jasmineEnv = jasmineEnv || window.jasmine.getEnv()
+    //
+    // setOption(jasmineConfig.stopOnFailure, jasmineEnv.throwOnExpectationFailure)
+    // setOption(jasmineConfig.seed, jasmineEnv.seed)
+    // setOption(jasmineConfig.random, jasmineEnv.randomizeTests)
+    //
+    // jasmineEnv.addReporter(new KarmaReporter(karma, jasmineEnv))
+    // jasmineEnv.execute()
+  }
+
+
 }
 
 function indexOf (collection, find, i /* opt*/) {
@@ -382,8 +388,8 @@ function filter (collection, filter, that /* opt*/) {
     return collection.filter(filter, that)
   }
 
-  var other = []
-  var v
+  var other = [];
+  var v;
   for (var i = 0, n = collection.length; i < n; i++) {
     if (i in collection && filter.call(that, v = collection[i], i, collection)) {
       other.push(v)
@@ -397,7 +403,7 @@ function map (collection, mapper, that /* opt*/) {
     return collection.map(mapper, that)
   }
 
-  var other = new Array(collection.length)
+  var other = new Array(collection.length);
   for (var i = 0, n = collection.length; i < n; i++) {
     if (i in collection) {
       other[i] = mapper.call(that, collection[i], i, collection)
