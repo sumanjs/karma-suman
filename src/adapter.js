@@ -351,6 +351,7 @@ function createStartFn (karma, jasmineEnv) {
   return function () {
 
     console.log('suman started.');
+    window.__suman.tsrq.resume();
     // var clientConfig = karma.config || {}
     // var jasmineConfig = clientConfig.jasmine || {}
     //
