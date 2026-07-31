@@ -1,5 +1,7 @@
 # karma-jasmine
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/sumanjs/karma-suman.svg)](https://greenkeeper.io/)
+
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/karma-runner/karma-jasmine)
  [![npm version](https://img.shields.io/npm/v/karma-jasmine.svg?style=flat-square)](https://www.npmjs.com/package/karma-jasmine) [![npm downloads](https://img.shields.io/npm/dm/karma-jasmine.svg?style=flat-square)](https://www.npmjs.com/package/karma-jasmine)
 
