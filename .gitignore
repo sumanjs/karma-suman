@@ -3,3 +3,7 @@ node_modules/
 tmp/
 lib/adapter.js
 integration-tests/
+tmp
+temp
+tmp/worktrees
+temp/worktrees
